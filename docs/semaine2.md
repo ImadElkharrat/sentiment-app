@@ -1,3 +1,5 @@
-Le modèle commet 7 erreurs sur 58 avis testés, toutes sur des avis mitigés où le sentiment change après un retournement comme « mais finalement ».
-Ces erreurs s'expliquent par le sac de mots, qui compte les termes positifs et négatifs sans tenir compte de leur ordre ni de la conclusion de l'avis.
-Pour les corriger, il faudrait une représentation qui conserve le contexte et l'ordre des mots, par exemple des embeddings étudiés en semaine 9.
+# Semaine 2 — Analyse des erreurs
+
+Les erreurs sont des avis mitigés qui changent de sens après « sauf que ensuite » : deux positifs prédits négatifs, un négatif prédit positif.
+Le sac de mots compte les mots positifs et négatifs sans voir leur ordre, donc il rate le retournement final.
+Il faudrait un modèle qui tient compte de l'ordre, par exemple avec des n-grammes (« sauf que ») ou un modèle comme CamemBERT.
