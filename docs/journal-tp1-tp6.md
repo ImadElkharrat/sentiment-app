@@ -4,10 +4,10 @@
 
 | | Membre A | Membre B |
 | --- | --- | --- |
-| Nom | *à compléter* | *à compléter* |
-| Compte GitHub | *à compléter* | *à compléter* |
+| Nom | Imad EL KHARRAT | Wiam MATAT |
+| Compte GitHub | @ImadElkharrat | @wiammatat |
 
-**Dépôt** : *adresse du dépôt GitHub, à compléter*
+**Dépôt** : https://github.com/ImadElkharrat/sentiment-app
 
 ## Comment remplir ce journal
 
