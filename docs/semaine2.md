@@ -1,0 +1,3 @@
+Le modèle commet 7 erreurs sur 58 avis testés, toutes sur des avis mitigés où le sentiment change après un retournement comme « mais finalement ».
+Ces erreurs s'expliquent par le sac de mots, qui compte les termes positifs et négatifs sans tenir compte de leur ordre ni de la conclusion de l'avis.
+Pour les corriger, il faudrait une représentation qui conserve le contexte et l'ordre des mots, par exemple des embeddings étudiés en semaine 9.
