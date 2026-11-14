@@ -1,14 +1,17 @@
-"""Raccord entre l'API et le modèle entraîné au TP2.
+"""Raccord entre l'API et le paquet installable de sentiment."""
+from typing import Literal, TypedDict
 
-L'API n'entraîne rien et ne connaît pas scikit-learn : elle appelle la fonction
-predict() de src/predict.py, qui charge models/sentiment.joblib une seule fois.
-"""
-import sys
-from pathlib import Path
+from sentiment_app.predict import charger_modele
+from sentiment_app.predict import predict as _predict
 
-RACINE = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RACINE / "src"))
-from predict import MODELE, charger_modele, predict as _predict  # noqa: E402  (fonctions du TP2)
+ContractLabel = Literal["POSITIVE", "NEGATIVE", "INDETERMINE"]
+MODEL_LABELS = {"positive", "negative"}
+
+
+class ApiPrediction(TypedDict):
+    label: ContractLabel
+    score: float
+    text: str
 
 
 class SentimentClassifier:
@@ -17,12 +20,15 @@ class SentimentClassifier:
     model_name = "tfidf-logreg (TP2, models/sentiment.joblib)"
 
     def __init__(self) -> None:
-        charger_modele()  # échoue immédiatement si le joblib manque : on ne démarre pas sans modèle
+        pipeline = charger_modele()
+        classes = set(getattr(pipeline, "classes_", []))
+        if not classes or not classes.issubset(MODEL_LABELS):
+            raise ValueError(f"classes de modèle inattendues : {sorted(classes)!r}")
 
-    def predict(self, text: str) -> dict:
+    def predict(self, text: str) -> ApiPrediction:
         """Renvoie {'label': 'POSITIVE'|'NEGATIVE', 'score': float, 'text': aperçu}."""
         r = _predict(text)  # lève ValueError si le texte est vide
-        return {"label": r["label"].upper(), "score": r["score"], "text": text[:100]}
+        return {"label": r["label"], "score": r["score"], "text": text[:100]}
 
 
 def load_model() -> SentimentClassifier:

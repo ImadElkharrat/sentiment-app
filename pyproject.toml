@@ -1,9 +1,31 @@
-# Configuration des outils de qualité (TP4). Le packaging (TP6) complétera ce fichier.
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentiment-app"
+version = "0.6.0"
+description = "Classifieur de sentiment d'avis clients en français"
+readme = "README-PAQUET.md"
+requires-python = ">=3.11"
+dependencies = ["scikit-learn==1.5.*", "joblib>=1.4"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+sentiment = "sentiment_app.cli:main"
+
+[tool.setuptools]
+packages = ["api", "ui", "sentiment_app"]
+package-dir = {sentiment_app = "src/sentiment_app"}
+
+# Configuration des outils de qualité (TP4).
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-extend-exclude = ["notebooks"]
+extend-exclude = ["notebooks", "ressources-etudiants"]
 
 [tool.ruff.lint]
 # E4, E7, E9, F : erreurs probables ; I : ordre des imports ; B : constructions à risque

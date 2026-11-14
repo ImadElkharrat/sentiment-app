@@ -35,3 +35,11 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 !data/jeu_or.csv
+
+# TP5
+!data/avis_exemple.csv
+
+# TP6
+src/sentiment_app/modele/*.joblib
+docs/livrable-tp4.txt
+dist/

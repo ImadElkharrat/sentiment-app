@@ -23,10 +23,59 @@ def test_demarrage_reel_charge_le_modele():
     assert "TP2" in reponse.json()["model"]
 
 
-# À écrire (étape D) :
-# D.2 modèle absent : chemin du modèle redirigé (monkeypatch), cache vidé
-#     (charger_modele.cache_clear()), l'API refuse de démarrer (FileNotFoundError) ;
-# D.3 modèle non chargé : l'API démarrée, modèle retiré de app.state, 503 sur /health et /predict ;
-# D.4 modèle en panne : predict lève RuntimeError, puis ValueError("bug interne") :
-#     500 dans les deux cas, sans le message interne dans la réponse.
-# Utilisez monkeypatch.setattr pour toute modification : il restaure l'état à la fin du test.
+def test_modele_absent_refuse_le_demarrage(monkeypatch, tmp_path):
+    import importlib
+
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+
+    predict = importlib.import_module("sentiment_app.predict")
+    monkeypatch.setattr(predict, "MODELE", tmp_path / "absent.joblib")
+    predict.charger_modele.cache_clear()
+    with pytest.raises(FileNotFoundError):
+        with TestClient(app):
+            pass
+    predict.charger_modele.cache_clear()
+
+
+def test_modele_non_charge_repond_503(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+
+    with TestClient(app) as client:
+        monkeypatch.setattr(app.state, "classifier", None)
+        assert client.get("/health").status_code == 503
+        assert client.post("/predict", json={"text": "Très bien"}).status_code == 503
+
+
+@pytest.mark.parametrize("exception", [RuntimeError("panne"), ValueError("bug interne")])
+def test_panne_du_modele_repond_500(monkeypatch, exception):
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+
+    class BrokenClassifier:
+        model_name = "modèle de test"
+
+        def predict(self, _text: str):
+            raise exception
+
+    with TestClient(app) as client:
+        monkeypatch.setattr(app.state, "classifier", BrokenClassifier())
+        reponse = client.post("/predict", json={"text": "Très bien"})
+        assert reponse.status_code == 500
+        assert "bug interne" not in reponse.text
+        assert "panne" not in reponse.text
+
+
+def test_classes_inattendues_refusent_le_demarrage(monkeypatch):
+    from api.model import SentimentClassifier
+
+    class UnexpectedPipeline:
+        classes_ = ["negative", "positive", "neutral"]
+
+    monkeypatch.setattr("api.model.charger_modele", lambda: UnexpectedPipeline())
+    with pytest.raises(ValueError, match="classes de modèle inattendues"):
+        SentimentClassifier()
