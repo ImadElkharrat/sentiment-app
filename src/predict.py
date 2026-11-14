@@ -1,53 +1,19 @@
 #!/usr/bin/env python
-"""Prédiction unitaire : la fonction que l'API de la semaine 3 appellera.
+"""Fichier de compatibilité (TP6) : le code vit désormais dans sentiment_app/predict.py.
 
-Usage :
+Les anciennes habitudes continuent de fonctionner :
   python src/predict.py "Livraison rapide, très satisfait"
-  >>> from predict import predict ; predict("texte")
+  >>> from predict import predict
+Aucune logique ici : tout est délégué au paquet (installé par pip install -e .).
 """
-import sys
-from functools import lru_cache
-from pathlib import Path
-from typing import Literal, TypedDict
-
-import joblib
-
-MODELE = Path(__file__).resolve().parents[1] / "models" / "sentiment.joblib"
-
-
-class Resultat(TypedDict):
-    """Le retour de predict() : l'étiquette du modèle, en minuscules, et sa confiance."""
-
-    label: Literal["positive", "negative"]
-    score: float
-
-
-@lru_cache(maxsize=1)
-def charger_modele():
-    """Chargé une seule fois par processus, pas à chaque appel."""
-    if not MODELE.exists():
-        raise FileNotFoundError("models/sentiment.joblib absent : lancez python src/train.py")
-    return joblib.load(MODELE)
-
-
-def predict(texte: str) -> Resultat:
-    """Renvoie {'label': 'positive'|'negative', 'score': float}."""
-    if not isinstance(texte, str) or not texte.strip():
-        raise ValueError("texte vide")
-    pipeline = charger_modele()
-    etiquette = pipeline.predict([texte])[0]
-    score = float(pipeline.predict_proba([texte]).max())
-    return {"label": etiquette, "score": round(score, 4)}
-
-
-def main() -> int:
-    if len(sys.argv) < 2:
-        print(__doc__)
-        return 2
-    resultat = predict(" ".join(sys.argv[1:]))
-    print(f"{resultat['label']} (confiance {resultat['score']:.0%})")
-    return 0
-
+from sentiment_app.predict import (  # noqa: F401  (réexportés pour les anciens imports)
+    MODELE,
+    Resultat,
+    charger_modele,
+    chemin_modele,
+    main,
+    predict,
+)
 
 if __name__ == "__main__":
     raise SystemExit(main())
