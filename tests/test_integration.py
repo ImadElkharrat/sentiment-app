@@ -24,7 +24,7 @@ def app():
 @pytest.fixture
 def cache_vide():
     """Vide le cache de chargement avant et après : aucun test n'hérite d'un modèle d'un autre."""
-    import predict
+    from sentiment_app import predict
 
     predict.charger_modele.cache_clear()
     yield predict
@@ -47,8 +47,8 @@ def test_modele_absent_refus_de_demarrer(app, cache_vide, monkeypatch, tmp_path)
     """D.2 : sans fichier de modèle, l'API ne démarre pas (le contrôle T20, automatique)."""
     from fastapi.testclient import TestClient
 
-    monkeypatch.setattr(cache_vide, "MODELE", tmp_path / "absent.joblib")
-    with pytest.raises(FileNotFoundError, match="sentiment.joblib absent"):
+    monkeypatch.setenv("SENTIMENT_MODELE", str(tmp_path / "absent.joblib"))
+    with pytest.raises(FileNotFoundError, match="modèle introuvable"):
         with TestClient(app):
             pass
 

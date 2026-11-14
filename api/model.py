@@ -1,17 +1,14 @@
 """Raccord entre l'API et le modèle entraîné au TP2.
 
 L'API n'entraîne rien et ne connaît pas scikit-learn : elle appelle la fonction
-predict() de src/predict.py, qui charge models/sentiment.joblib une seule fois.
+predict() du paquet sentiment_app, qui charge le modèle une seule fois
+(models/sentiment.joblib, ou le chemin donné par SENTIMENT_MODELE).
 """
-import sys
-from pathlib import Path
 from typing import Final, TypedDict
 
-RACINE = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RACINE / "src"))
-from api.schemas import Etiquette  # noqa: E402
-from predict import MODELE, charger_modele  # noqa: E402  (fonctions du TP2)
-from predict import predict as _predict  # noqa: E402
+from api.schemas import Etiquette
+from sentiment_app.predict import MODELE, charger_modele
+from sentiment_app.predict import predict as _predict
 
 __all__ = ["MODELE", "SEUIL_ABSTENTION", "Prediction", "SentimentClassifier", "load_model"]
 
