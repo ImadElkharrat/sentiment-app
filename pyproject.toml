@@ -1,4 +1,36 @@
-# Configuration des outils de qualité (TP4). Le packaging (TP6) complétera ce fichier.
+# Le paquet installable (TP6), puis la configuration des outils de qualité (TP4).
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentiment-app"
+dynamic = ["version"]
+description = "Analyse de sentiment des avis : modèle TF-IDF, API FastAPI et commande sentiment"
+requires-python = ">=3.11"
+# Le modèle est un pickle scikit-learn : la même version mineure qu'à l'entraînement.
+dependencies = [
+    "scikit-learn==1.5.*",
+    "joblib>=1.4",
+    "fastapi==0.115.*",
+    "pydantic>=2.9,<3",
+    "uvicorn==0.30.*",
+    "httpx==0.27.*",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit==1.39.*", "pandas==2.2.*"]   # pip install "sentiment-app[ui]" pour l'interface
+
+[project.scripts]
+sentiment = "sentiment_app.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "sentiment_app.__version__" }
+
+[tool.setuptools.packages.find]
+# Seulement le code servi : ni tests, ni données, ni modèle, ni scripts d'entraînement.
+include = ["api*", "sentiment_app*", "ui*"]
 
 [tool.ruff]
 target-version = "py311"
@@ -11,7 +43,6 @@ select = ["E4", "E7", "E9", "F", "I", "B"]
 
 [tool.mypy]
 python_version = "3.11"
-mypy_path = "src"            # pour que mypy trouve predict.py, importé par api/model.py
 check_untyped_defs = true
 warn_unused_ignores = true
 
